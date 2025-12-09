@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.example.demo.member.repository.MemberMapper">
+
+    <resultMap id="MemberMap" type="Member">
+        <id property="id" column="ID"/>
+        <result property="userid" column="USERID"/>
+        <result property="name" column="NAME"/>
+        <result property="password" column="PASSWORD"/>
+        <result property="role" column="ROLE"/>
+        <result property="createdAt" column="CREATED_AT"/>
+        <result property="updatedAt" column="UPDATED_AT"/>
+        <result property="isDeleted" column="IS_DELETED"/>
+    </resultMap>
+
+    <!-- 전체 조회 -->
+    <select id="findAll" resultMap="MemberMap">
+        SELECT * FROM MEMBERS
+        WHERE IS_DELETED = 0
+    </select>
+
+    <!-- ID 조회 -->
+    <select id="findById" parameterType="long" resultMap="MemberMap">
+        SELECT * FROM MEMBERS
+        WHERE ID = #{id} AND IS_DELETED = 0
+    </select>
+
+    <!-- 추가 (selectKey 사용) -->
+    <insert id="insert" parameterType="Member">
+        <selectKey keyProperty="id" resultType="long" order="BEFORE">
+            SELECT MEMBERS_SEQ.NEXTVAL FROM DUAL
+        </selectKey>
+        INSERT INTO MEMBERS (ID, USERID, NAME, PASSWORD, ROLE, CREATED_AT, IS_DELETED)
+        VALUES (#{id}, #{userid}, #{name}, #{password}, #{role}, SYSDATE, 0)
+    </insert>
+
+    <!-- 수정 -->
+    <update id="update" parameterType="Member">
+        UPDATE MEMBERS
+        SET 
+            USERID = #{userid},
+            NAME = #{name},
+            PASSWORD = #{password},
+            ROLE = #{role},
+            UPDATED_AT = SYSDATE
+        WHERE ID = #{id} AND IS_DELETED = 0
+    </update>
+
+    <!-- 논리 삭제 -->
+    <update id="delete" parameterType="long">
+        UPDATE MEMBERS
+        SET IS_DELETED = 1,
+            UPDATED_AT = SYSDATE
+        WHERE ID = #{id}
+    </update>
+
+</mapper>
